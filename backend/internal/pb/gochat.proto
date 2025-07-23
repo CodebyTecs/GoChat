@@ -19,5 +19,7 @@ message Message {
 message Empty {}
 
 service ChatService {
-
+  rpc RegisterUser(User) returns (Empty);
+  rpc SendMessage(Message) returns (Empty);
+  rpc StreamMessages(Empty) returns (stream Message);
 }

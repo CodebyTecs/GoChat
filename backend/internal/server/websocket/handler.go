@@ -1,6 +1,8 @@
 package websocket
 
 import (
+	"GoChat/internal/pb"
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -11,6 +13,8 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
+var clients = make(map[*websocket.Conn]bool)
+
 func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -19,12 +23,23 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	for {
-		_, msg, err := conn.ReadMessage()
+	clients[conn] = true
+	log.Println("Client connected")
+
+	// Отправка сообщений клиенту
+	for msg := range MessageChannel {
+		data, err := json.Marshal(msg)
 		if err != nil {
-			log.Println("Read error:", err)
-			break
+			log.Println("Marshal error:", err)
+			continue
 		}
-		log.Printf("Received: %s", msg)
+
+		for client := range clients {
+			if err := client.WriteMessage(websocket.TextMessage, data); err != nil {
+				log.Println("Write error:", err)
+				client.Close()
+				delete(clients, client)
+			}
+		}
 	}
 }

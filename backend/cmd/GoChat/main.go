@@ -23,13 +23,14 @@ func main() {
 
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatal("Failed to listen:", err)
 	}
 
 	s := grpc.NewServer()
-	pb.RegisterChatServiceServer(s, &server.ChatServer{})
-	log.Println("gRPC server is running on port 50051")
+	pb.RegisterChatServiceServer(s, &grpc.ChatServer{})
+
+	log.Println("gRPC server started on :50051")
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Fatal("Failed to serve:", err)
 	}
 }
