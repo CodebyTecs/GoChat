@@ -1,9 +1,9 @@
-package GoChat
+package main
 
 import (
 	"GoChat/internal/infrastructure/db/postgres"
 	"GoChat/internal/pb"
-	"GoChat/internal/server"
+	grpcserver "GoChat/internal/server/grpc"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"log"
@@ -27,7 +27,9 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	pb.RegisterChatServiceServer(s, &grpc.ChatServer{})
+	pb.RegisterChatServiceServer(s, &grpcserver.ChatServer{
+		DB: db,
+	})
 
 	log.Println("gRPC server started on :50051")
 	if err := s.Serve(lis); err != nil {

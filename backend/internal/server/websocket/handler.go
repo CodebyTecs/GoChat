@@ -1,7 +1,6 @@
 package websocket
 
 import (
-	"GoChat/internal/pb"
 	"encoding/json"
 	"log"
 	"net/http"

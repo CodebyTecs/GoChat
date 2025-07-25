@@ -6,7 +6,7 @@ import (
 )
 
 func SaveMessage(db *sqlx.DB, msg domain.Message) error {
-	_, err := db.Exec("INSERT INTO messages (sender, receiver, message) VALUES ($1, $2, $3), msg.Sender, msg.Receiver, msg.Text)")
+	_, err := db.Exec("INSERT INTO messages (sender, receiver, text) VALUES ($1, $2, $3)", msg.Sender, msg.Receiver, msg.Text)
 	return err
 }
 
