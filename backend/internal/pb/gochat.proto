@@ -16,10 +16,15 @@ message Message {
   string created_at = 4;
 }
 
+message TokenResponse {
+  string token = 1;
+}
+
 message Empty {}
 
 service ChatService {
-  rpc RegisterUser(User) returns (Empty);
-  rpc SendMessage(Message) returns (Empty);
+  rpc RegisterUser(User) returns (TokenResponse);
+  rpc Login(User) returns (TokenResponse);
   rpc StreamMessages(Empty) returns (stream Message);
+  rpc SendMessage(Message) returns (Empty);
 }

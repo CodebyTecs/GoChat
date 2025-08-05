@@ -20,17 +20,19 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	ChatService_RegisterUser_FullMethodName   = "/gochat.ChatService/RegisterUser"
-	ChatService_SendMessage_FullMethodName    = "/gochat.ChatService/SendMessage"
+	ChatService_Login_FullMethodName          = "/gochat.ChatService/Login"
 	ChatService_StreamMessages_FullMethodName = "/gochat.ChatService/StreamMessages"
+	ChatService_SendMessage_FullMethodName    = "/gochat.ChatService/SendMessage"
 )
 
 // ChatServiceClient is the client API for ChatService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChatServiceClient interface {
-	RegisterUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*Empty, error)
-	SendMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Empty, error)
+	RegisterUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*TokenResponse, error)
+	Login(ctx context.Context, in *User, opts ...grpc.CallOption) (*TokenResponse, error)
 	StreamMessages(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Message], error)
+	SendMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type chatServiceClient struct {
@@ -41,9 +43,9 @@ func NewChatServiceClient(cc grpc.ClientConnInterface) ChatServiceClient {
 	return &chatServiceClient{cc}
 }
 
-func (c *chatServiceClient) RegisterUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*Empty, error) {
+func (c *chatServiceClient) RegisterUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*TokenResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Empty)
+	out := new(TokenResponse)
 	err := c.cc.Invoke(ctx, ChatService_RegisterUser_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -51,10 +53,10 @@ func (c *chatServiceClient) RegisterUser(ctx context.Context, in *User, opts ...
 	return out, nil
 }
 
-func (c *chatServiceClient) SendMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Empty, error) {
+func (c *chatServiceClient) Login(ctx context.Context, in *User, opts ...grpc.CallOption) (*TokenResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, ChatService_SendMessage_FullMethodName, in, out, cOpts...)
+	out := new(TokenResponse)
+	err := c.cc.Invoke(ctx, ChatService_Login_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,13 +82,24 @@ func (c *chatServiceClient) StreamMessages(ctx context.Context, in *Empty, opts 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type ChatService_StreamMessagesClient = grpc.ServerStreamingClient[Message]
 
+func (c *chatServiceClient) SendMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, ChatService_SendMessage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChatServiceServer is the server API for ChatService service.
 // All implementations must embed UnimplementedChatServiceServer
 // for forward compatibility.
 type ChatServiceServer interface {
-	RegisterUser(context.Context, *User) (*Empty, error)
-	SendMessage(context.Context, *Message) (*Empty, error)
+	RegisterUser(context.Context, *User) (*TokenResponse, error)
+	Login(context.Context, *User) (*TokenResponse, error)
 	StreamMessages(*Empty, grpc.ServerStreamingServer[Message]) error
+	SendMessage(context.Context, *Message) (*Empty, error)
 	mustEmbedUnimplementedChatServiceServer()
 }
 
@@ -97,14 +110,17 @@ type ChatServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedChatServiceServer struct{}
 
-func (UnimplementedChatServiceServer) RegisterUser(context.Context, *User) (*Empty, error) {
+func (UnimplementedChatServiceServer) RegisterUser(context.Context, *User) (*TokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterUser not implemented")
 }
-func (UnimplementedChatServiceServer) SendMessage(context.Context, *Message) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
+func (UnimplementedChatServiceServer) Login(context.Context, *User) (*TokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
 func (UnimplementedChatServiceServer) StreamMessages(*Empty, grpc.ServerStreamingServer[Message]) error {
 	return status.Errorf(codes.Unimplemented, "method StreamMessages not implemented")
+}
+func (UnimplementedChatServiceServer) SendMessage(context.Context, *Message) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
 }
 func (UnimplementedChatServiceServer) mustEmbedUnimplementedChatServiceServer() {}
 func (UnimplementedChatServiceServer) testEmbeddedByValue()                     {}
@@ -145,6 +161,35 @@ func _ChatService_RegisterUser_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ChatService_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(User)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServiceServer).Login(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChatService_Login_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServiceServer).Login(ctx, req.(*User))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChatService_StreamMessages_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ChatServiceServer).StreamMessages(m, &grpc.GenericServerStream[Empty, Message]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ChatService_StreamMessagesServer = grpc.ServerStreamingServer[Message]
+
 func _ChatService_SendMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Message)
 	if err := dec(in); err != nil {
@@ -163,17 +208,6 @@ func _ChatService_SendMessage_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ChatService_StreamMessages_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(Empty)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(ChatServiceServer).StreamMessages(m, &grpc.GenericServerStream[Empty, Message]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type ChatService_StreamMessagesServer = grpc.ServerStreamingServer[Message]
-
 // ChatService_ServiceDesc is the grpc.ServiceDesc for ChatService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -184,6 +218,10 @@ var ChatService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RegisterUser",
 			Handler:    _ChatService_RegisterUser_Handler,
+		},
+		{
+			MethodName: "Login",
+			Handler:    _ChatService_Login_Handler,
 		},
 		{
 			MethodName: "SendMessage",

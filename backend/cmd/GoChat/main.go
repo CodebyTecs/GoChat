@@ -1,6 +1,7 @@
 package main
 
 import (
+	"GoChat/internal/infrastructure/cache/redis"
 	"GoChat/internal/infrastructure/db/postgres"
 	"GoChat/internal/pb"
 	grpcserver "GoChat/internal/server/grpc"
@@ -20,13 +21,14 @@ func main() {
 	_ = godotenv.Load()
 
 	db := postgres.Connect()
+	redis.InitRedis()
 
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatal("Failed to listen:", err)
 	}
 
-	s := grpc.NewServer()
+	s := grpc.NewServer(grpc.UnaryInterceptor(grpcserver.AuthInterceptor()))
 	pb.RegisterChatServiceServer(s, &grpcserver.ChatServer{
 		DB: db,
 	})

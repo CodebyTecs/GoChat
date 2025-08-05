@@ -16,6 +16,12 @@ func GetUsername(db *sqlx.DB, u domain.User) (string, error) {
 	return result, err
 }
 
+func GetUserByUsername(db *sqlx.DB, username string) (domain.User, error) {
+	var user domain.User
+	err := db.Get(&user, "SELECT id, username, password FROM users WHERE username = $1", username)
+	return user, err
+}
+
 func IsUserExist(db *sqlx.DB, u domain.User) (bool, error) {
 	var exists bool
 	err := db.Get(&exists, "SELECT username FROM users WHERE username = $1", u.Username)
