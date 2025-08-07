@@ -5,13 +5,13 @@ import (
 	"GoChat/pkg/auth"
 	"context"
 	"errors"
+	"log"
+
 	redislib "github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"log"
-	"strings"
 )
 
 func AuthInterceptor() grpc.UnaryServerInterceptor {
@@ -20,7 +20,8 @@ func AuthInterceptor() grpc.UnaryServerInterceptor {
 		req interface{},
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler) (interface{}, error) {
-		if strings.HasPrefix(info.FullMethod, "Login") || strings.HasPrefix(info.FullMethod, "RegisterUser") {
+		log.Println("FullMethod:", info.FullMethod)
+		if info.FullMethod == "/gochat.ChatService/RegisterUser" || info.FullMethod == "/gochat.ChatService/Login" {
 			return handler(ctx, req)
 		}
 

@@ -8,11 +8,12 @@ import (
 	"GoChat/internal/server/websocket"
 	"GoChat/pkg/auth"
 	"context"
+	"log"
+	"time"
+
 	"github.com/jmoiron/sqlx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"log"
-	"time"
 )
 
 type ChatServer struct {
@@ -60,6 +61,37 @@ func (s *ChatServer) LoginUser(ctx context.Context, user *pb.User) (*pb.TokenRes
 	}
 
 	return &pb.TokenResponse{Token: token}, nil
+}
+
+func (s *ChatServer) GetMessageHistory(empty *pb.Empty, stream pb.ChatService_GetMessageHistoryServer) error {
+	username, err := getUsernameFromContext(stream.Context())
+	if err != nil {
+		log.Printf("Unauthorized history request: %v", err)
+		return status.Error(codes.Unauthenticated, "Unauthorized history request")
+	}
+
+	rows, err := s.DB.Query(`
+		SELECT sender, receiver, text, created_at
+		FROM messages
+		WHERE receiver = $1 OR receiver = ''
+		ORDER BY created_at DESC
+		LIMIT 50`, username)
+	if err != nil {
+		return status.Errorf(codes.Internal, "failed to fetch history: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var msg pb.Message
+		if err := rows.Scan(&msg.Sender, &msg.Receiver, &msg.Text, &msg.CreatedAt); err != nil {
+			return status.Errorf(codes.Internal, "failed to scan message: %v", err)
+		}
+		if err := stream.Send(&msg); err != nil {
+			return status.Errorf(codes.Internal, "failed to send message: %v", err)
+		}
+	}
+
+	return nil
 }
 
 func (s *ChatServer) StreamMessages(empty *pb.Empty, stream pb.ChatService_StreamMessagesServer) error {
