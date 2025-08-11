@@ -8,11 +8,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func Connect() *sqlx.DB {
+func Connect() (*sqlx.DB, error) {
 	dsn := os.Getenv("DB_DSN")
 	db, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
 		log.Fatalln("Error connecting to database:", err)
 	}
-	return db
+	return db, err
 }

@@ -238,10 +238,10 @@ const file_gochat_proto_rawDesc = "" +
 	"created_at\x18\x04 \x01(\tR\tcreatedAt\"%\n" +
 	"\rTokenResponse\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\"\a\n" +
-	"\x05Empty2\x8a\x02\n" +
+	"\x05Empty2\x8e\x02\n" +
 	"\vChatService\x123\n" +
-	"\fRegisterUser\x12\f.gochat.User\x1a\x15.gochat.TokenResponse\x12,\n" +
-	"\x05Login\x12\f.gochat.User\x1a\x15.gochat.TokenResponse\x125\n" +
+	"\fRegisterUser\x12\f.gochat.User\x1a\x15.gochat.TokenResponse\x120\n" +
+	"\tLoginUser\x12\f.gochat.User\x1a\x15.gochat.TokenResponse\x125\n" +
 	"\x11getMessageHistory\x12\r.gochat.Empty\x1a\x0f.gochat.Message0\x01\x122\n" +
 	"\x0eStreamMessages\x12\r.gochat.Empty\x1a\x0f.gochat.Message0\x01\x12-\n" +
 	"\vSendMessage\x12\x0f.gochat.Message\x1a\r.gochat.EmptyB2Z0github.com/CodebyTecs/GoChat/backend/internal/pbb\x06proto3"
@@ -267,12 +267,12 @@ var file_gochat_proto_goTypes = []any{
 }
 var file_gochat_proto_depIdxs = []int32{
 	0, // 0: gochat.ChatService.RegisterUser:input_type -> gochat.User
-	0, // 1: gochat.ChatService.Login:input_type -> gochat.User
+	0, // 1: gochat.ChatService.LoginUser:input_type -> gochat.User
 	3, // 2: gochat.ChatService.getMessageHistory:input_type -> gochat.Empty
 	3, // 3: gochat.ChatService.StreamMessages:input_type -> gochat.Empty
 	1, // 4: gochat.ChatService.SendMessage:input_type -> gochat.Message
 	2, // 5: gochat.ChatService.RegisterUser:output_type -> gochat.TokenResponse
-	2, // 6: gochat.ChatService.Login:output_type -> gochat.TokenResponse
+	2, // 6: gochat.ChatService.LoginUser:output_type -> gochat.TokenResponse
 	1, // 7: gochat.ChatService.getMessageHistory:output_type -> gochat.Message
 	1, // 8: gochat.ChatService.StreamMessages:output_type -> gochat.Message
 	3, // 9: gochat.ChatService.SendMessage:output_type -> gochat.Empty

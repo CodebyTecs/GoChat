@@ -2,9 +2,10 @@ package redis
 
 import (
 	"context"
-	"github.com/redis/go-redis/v9"
 	"log"
 	"os"
+
+	"github.com/redis/go-redis/v9"
 )
 
 var (
@@ -12,12 +13,15 @@ var (
 	Redis *redis.Client
 )
 
-func InitRedis() {
+const RedisPort = "localhost:6379"
+
+func InitRedis() error {
 	Redis = redis.NewClient(&redis.Options{
-		Addr: os.Getenv("REDIS_ADDR"),
+		Addr: os.Getenv(RedisPort),
 		DB:   0,
 	})
 	if err := Redis.Ping(Ctx).Err(); err != nil {
 		log.Fatalf("cannot connect to Redis: %v", err)
 	}
+	return nil
 }

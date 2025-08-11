@@ -64,7 +64,7 @@ func (s *ChatServer) LoginUser(ctx context.Context, user *pb.User) (*pb.TokenRes
 }
 
 func (s *ChatServer) GetMessageHistory(empty *pb.Empty, stream pb.ChatService_GetMessageHistoryServer) error {
-	username, err := getUsernameFromContext(stream.Context())
+	username, err := getUsernameFromContext(stream.Context(), s.DB)
 	if err != nil {
 		log.Printf("Unauthorized history request: %v", err)
 		return status.Error(codes.Unauthenticated, "Unauthorized history request")
@@ -95,6 +95,27 @@ func (s *ChatServer) GetMessageHistory(empty *pb.Empty, stream pb.ChatService_Ge
 }
 
 func (s *ChatServer) StreamMessages(empty *pb.Empty, stream pb.ChatService_StreamMessagesServer) error {
+	ctx := stream.Context()
+
+	username, err := getUsernameFromContext(ctx, s.DB)
+	log.Printf("StreamMessages: user %s is trying to connect", username)
+	if err != nil {
+		log.Printf("Unauthorized stream access: %v", err)
+		return status.Error(codes.Unauthenticated, "unauthorized")
+	}
+
+	exists, err := postgres.IsUserExist(s.DB, username)
+	if err != nil {
+		log.Printf("DB error: %v", err)
+		return status.Error(codes.Internal, "internal server error")
+	}
+	if !exists {
+		log.Printf("User %s not found in DB", username)
+		return status.Error(codes.PermissionDenied, "user not found")
+	}
+
+	log.Printf("Client %s connected", username)
+
 	for {
 		select {
 		case msg := <-websocket.MessageChannel:
@@ -102,8 +123,8 @@ func (s *ChatServer) StreamMessages(empty *pb.Empty, stream pb.ChatService_Strea
 				log.Printf("Failed to send message: %v", err)
 				return err
 			}
-		case <-stream.Context().Done():
-			log.Println("Client disconnected from stream")
+		case <-ctx.Done():
+			log.Printf("Client %s disconnected from stream", username)
 			return nil
 		}
 	}

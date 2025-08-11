@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"GoChat/internal/domain"
+
 	"github.com/jmoiron/sqlx"
 )
 
@@ -22,8 +23,8 @@ func GetUserByUsername(db *sqlx.DB, username string) (domain.User, error) {
 	return user, err
 }
 
-func IsUserExist(db *sqlx.DB, u domain.User) (bool, error) {
+func IsUserExist(db *sqlx.DB, username string) (bool, error) {
 	var exists bool
-	err := db.Get(&exists, "SELECT username FROM users WHERE username = $1", u.Username)
+	err := db.Get(&exists, "SELECT username FROM users WHERE username = $1", username)
 	return exists, err
 }

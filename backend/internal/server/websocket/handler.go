@@ -25,7 +25,6 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	clients[conn] = true
 	log.Println("Client connected")
 
-	// Отправка сообщений клиенту
 	for msg := range MessageChannel {
 		data, err := json.Marshal(msg)
 		if err != nil {

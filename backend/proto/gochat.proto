@@ -24,7 +24,7 @@ message Empty {}
 
 service ChatService {
   rpc RegisterUser(User) returns (TokenResponse);
-  rpc Login(User) returns (TokenResponse);
+  rpc LoginUser(User) returns (TokenResponse);
   rpc getMessageHistory(Empty) returns (stream Message);
   rpc StreamMessages(Empty) returns (stream Message);
   rpc SendMessage(Message) returns (Empty);

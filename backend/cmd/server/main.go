@@ -11,10 +11,13 @@ import (
 	"google.golang.org/grpc"
 )
 
+const gRPCPort = "localhost:50051"
+const httpPort = ":8080"
+
 func main() {
 	httplib.HandleFunc("/ws", websocket.HandleWebSocket)
 
-	grpcConn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+	grpcConn, err := grpc.Dial(gRPCPort, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Failed to connect to gRPC server: %v", err)
 	}
@@ -23,9 +26,10 @@ func main() {
 	grpcClient := pb.NewChatServiceClient(grpcConn)
 
 	httplib.HandleFunc("/RegisterUser", http.RegisterUserHandler(grpcClient))
+	httplib.HandleFunc("/LoginUser", http.LoginUserHandler(grpcClient))
 
-	log.Println("Server started at :8080")
-	if err := httplib.ListenAndServe(":8080", nil); err != nil {
+	log.Printf("Server started at %s", httpPort)
+	if err := httplib.ListenAndServe(httpPort, nil); err != nil {
 		log.Fatal(err)
 	}
 }

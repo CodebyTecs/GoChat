@@ -21,7 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	ChatService_RegisterUser_FullMethodName      = "/gochat.ChatService/RegisterUser"
-	ChatService_Login_FullMethodName             = "/gochat.ChatService/Login"
+	ChatService_LoginUser_FullMethodName         = "/gochat.ChatService/LoginUser"
 	ChatService_GetMessageHistory_FullMethodName = "/gochat.ChatService/getMessageHistory"
 	ChatService_StreamMessages_FullMethodName    = "/gochat.ChatService/StreamMessages"
 	ChatService_SendMessage_FullMethodName       = "/gochat.ChatService/SendMessage"
@@ -32,7 +32,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChatServiceClient interface {
 	RegisterUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*TokenResponse, error)
-	Login(ctx context.Context, in *User, opts ...grpc.CallOption) (*TokenResponse, error)
+	LoginUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*TokenResponse, error)
 	GetMessageHistory(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Message], error)
 	StreamMessages(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Message], error)
 	SendMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Empty, error)
@@ -56,10 +56,10 @@ func (c *chatServiceClient) RegisterUser(ctx context.Context, in *User, opts ...
 	return out, nil
 }
 
-func (c *chatServiceClient) Login(ctx context.Context, in *User, opts ...grpc.CallOption) (*TokenResponse, error) {
+func (c *chatServiceClient) LoginUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*TokenResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(TokenResponse)
-	err := c.cc.Invoke(ctx, ChatService_Login_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, ChatService_LoginUser_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (c *chatServiceClient) SendMessage(ctx context.Context, in *Message, opts .
 // for forward compatibility.
 type ChatServiceServer interface {
 	RegisterUser(context.Context, *User) (*TokenResponse, error)
-	Login(context.Context, *User) (*TokenResponse, error)
+	LoginUser(context.Context, *User) (*TokenResponse, error)
 	GetMessageHistory(*Empty, grpc.ServerStreamingServer[Message]) error
 	StreamMessages(*Empty, grpc.ServerStreamingServer[Message]) error
 	SendMessage(context.Context, *Message) (*Empty, error)
@@ -136,8 +136,8 @@ type UnimplementedChatServiceServer struct{}
 func (UnimplementedChatServiceServer) RegisterUser(context.Context, *User) (*TokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterUser not implemented")
 }
-func (UnimplementedChatServiceServer) Login(context.Context, *User) (*TokenResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+func (UnimplementedChatServiceServer) LoginUser(context.Context, *User) (*TokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LoginUser not implemented")
 }
 func (UnimplementedChatServiceServer) GetMessageHistory(*Empty, grpc.ServerStreamingServer[Message]) error {
 	return status.Errorf(codes.Unimplemented, "method GetMessageHistory not implemented")
@@ -187,20 +187,20 @@ func _ChatService_RegisterUser_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ChatService_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ChatService_LoginUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(User)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChatServiceServer).Login(ctx, in)
+		return srv.(ChatServiceServer).LoginUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ChatService_Login_FullMethodName,
+		FullMethod: ChatService_LoginUser_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServiceServer).Login(ctx, req.(*User))
+		return srv.(ChatServiceServer).LoginUser(ctx, req.(*User))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -257,8 +257,8 @@ var ChatService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ChatService_RegisterUser_Handler,
 		},
 		{
-			MethodName: "Login",
-			Handler:    _ChatService_Login_Handler,
+			MethodName: "LoginUser",
+			Handler:    _ChatService_LoginUser_Handler,
 		},
 		{
 			MethodName: "SendMessage",
