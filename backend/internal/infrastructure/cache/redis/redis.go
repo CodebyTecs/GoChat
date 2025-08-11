@@ -2,26 +2,24 @@ package redis
 
 import (
 	"context"
-	"log"
-	"os"
+	"fmt"
 
 	"github.com/redis/go-redis/v9"
 )
 
 var (
-	Ctx   = context.Background()
 	Redis *redis.Client
 )
 
 const RedisPort = "localhost:6379"
 
-func InitRedis() error {
+func InitRedis(ctx context.Context) error {
 	Redis = redis.NewClient(&redis.Options{
-		Addr: os.Getenv(RedisPort),
+		Addr: RedisPort,
 		DB:   0,
 	})
-	if err := Redis.Ping(Ctx).Err(); err != nil {
-		log.Fatalf("cannot connect to Redis: %v", err)
+	if err := Redis.Ping(ctx).Err(); err != nil {
+		return fmt.Errorf("cannot connect to Redis: %w", err)
 	}
 	return nil
 }

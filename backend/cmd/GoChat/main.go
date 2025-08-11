@@ -5,8 +5,10 @@ import (
 	"GoChat/internal/infrastructure/db/postgres"
 	"GoChat/internal/pb"
 	grpcserver "GoChat/internal/server/grpc"
+	"context"
 	"log"
 	"net"
+	"time"
 
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
@@ -17,12 +19,14 @@ func main() {
 		log.Fatal("No .env file found")
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
 	db, err := postgres.Connect()
 	if err != nil {
 		log.Fatalln("Error connecting to database:", err)
 	}
-	redis.InitRedis()
-	if err != nil {
+	if err := redis.InitRedis(ctx); err != nil {
 		log.Fatalln("Redis init error:", err)
 	}
 
